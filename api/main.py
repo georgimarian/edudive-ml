@@ -1,5 +1,5 @@
 from flask import Flask
-from document_process import document_process
+from util.document_process import document_process
 
 app = Flask(__name__)
 
