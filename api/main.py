@@ -5,5 +5,8 @@ app = Flask(__name__)
 
 @app.route("/")
 def hello_world():
-    document_process()
     return "hello world"
+
+@app.route("/process")
+def process_document():
+    return document_process()

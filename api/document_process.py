@@ -4,7 +4,7 @@ import PyPDF2
 import io 
 import nltk
 import numpy as np
-import lexrank
+import api.lexrank as lexrank
 import re
 
 model = SentenceTransformer('all-MiniLM-L6-v2')
