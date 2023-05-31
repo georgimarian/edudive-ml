@@ -7,7 +7,7 @@ import numpy as np
 import lexrank as lexrank
 import re
 
-model = SentenceTransformer('all-MiniLM-L6-v2')
+model = SentenceTransformer('all-MiniLM-L6-v2', cache_folder='./cache')
 
 # # Two lists of sentences
 # sentences1 = ["Efficient development of activities organized in a inter-disciplinary group and the development of emphatic abilities of inter-human communication, relationships and collaboration with different groups.",
