@@ -1,5 +1,10 @@
 from flask import Flask
-# from util.document_process import document_process
+
+from document_process import document_process
+
+import json
+import pickle
+import os
 
 app = Flask(__name__)
 
@@ -7,6 +12,20 @@ app = Flask(__name__)
 def hello_world():
     return "hello world"
 
-# @app.route("/process")
-# def process_document():
-#     return document_process()
+def filterFunction(result):
+    print(result)
+    if result['score'] > 0.2:
+        return True
+    return False
+
+@app.route("/process")
+def process_document():
+    filename = 'saved_model.pkl'
+    if os.path.isfile(filename):
+        model = pickle.load(open(filename, 'rb'))
+        results = document_process(model)
+    else:
+        results = document_process()
+    filteredResult = filter(filterFunction, results)
+    # print(result)
+    return json.dumps(list(filteredResult))
