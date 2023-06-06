@@ -1,2 +1,3 @@
 /myvenv
 /.vscode
+./cache/sentence-transformers_all-MiniLM-L6-v2
