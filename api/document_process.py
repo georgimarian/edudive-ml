@@ -1,14 +1,12 @@
-from sentence_transformers import SentenceTransformer, util
+# from sentence_transformers import SentenceTransformer, util
 import urllib.request
 import PyPDF2
 import io 
-import nltk
-import numpy as np
 import lexrank as lexrank
 import re
 import pickle
 
-predef_model = SentenceTransformer('all-MiniLM-L6-v2', cache_folder='./cache')
+# predef_model = SentenceTransformer('all-MiniLM-L6-v2', cache_folder='./cache')
 
 # # Two lists of sentences
 # sentences1 = ["Efficient development of activities organized in a inter-disciplinary group and the development of emphatic abilities of inter-human communication, relationships and collaboration with different groups.",
