@@ -1,4 +1,4 @@
-from sentence_transformers import SentenceTransformer, util
+# from sentence_transformers import SentenceTransformer, util
 import urllib.request
 import PyPDF2
 import io 
@@ -6,9 +6,9 @@ import io
 import re
 import pickle
 
-import numpy as np
-from numpy import dot
-from numpy.linalg import norm
+# import numpy as np
+# from numpy import dot
+# from numpy.linalg import norm
 
 # predef_model = SentenceTransformer('all-MiniLM-L6-v2', cache_folder='./cache')
 
@@ -35,17 +35,17 @@ from numpy.linalg import norm
 # #Output the pairs with their score
 # for i in range(len(sentences1)):
 #     print("{} \t\t {} \t\t Score: {:.4f}".format(sentences1[i], sentences2[i], cosine_scores[i][i]))
-def cos_sim(a, b):
-  a = np.array(a)
-  b = np.array(b)
-  return dot(a, b)/(norm(a)*norm(b))
+# def cos_sim(a, b):
+#   a = np.array(a)
+#   b = np.array(b)
+#   return dot(a, b)/(norm(a)*norm(b))
 
 predef_model = ''
 def document_process(model = predef_model, cos_sim=''): 
   print(model)
   if model == predef_model:
     pickle.dump(predef_model, open('saved_model.pkl', 'wb'))
-    pickle.dump(util.cos_sim, open('cos_sim.pkl','wb'))
+    # pickle.dump(util.cos_sim, open('cos_sim.pkl','wb'))
   cos_sim = pickle.load(open('cos_sim.pkl', 'rb'))
   URLS = [
     'https://www.cs.ubbcluj.ro//files/curricula/2022/syllabus/IS_sem1_MME8025_en_grigo_2022_6966.pdf',
