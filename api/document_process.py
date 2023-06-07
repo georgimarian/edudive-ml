@@ -1,10 +1,14 @@
-# from sentence_transformers import SentenceTransformer, util
+from sentence_transformers import SentenceTransformer, util
 import urllib.request
 import PyPDF2
 import io 
-import lexrank as lexrank
+# import lexrank as lexrank
 import re
 import pickle
+
+import numpy as np
+from numpy import dot
+from numpy.linalg import norm
 
 # predef_model = SentenceTransformer('all-MiniLM-L6-v2', cache_folder='./cache')
 
@@ -31,11 +35,18 @@ import pickle
 # #Output the pairs with their score
 # for i in range(len(sentences1)):
 #     print("{} \t\t {} \t\t Score: {:.4f}".format(sentences1[i], sentences2[i], cosine_scores[i][i]))
+def cos_sim(a, b):
+  a = np.array(a)
+  b = np.array(b)
+  return dot(a, b)/(norm(a)*norm(b))
 
-def document_process(model = predef_model): 
+predef_model = ''
+def document_process(model = predef_model, cos_sim=''): 
   print(model)
   if model == predef_model:
-     pickle.dump(predef_model, open('saved_model.pkl', 'wb'))
+    pickle.dump(predef_model, open('saved_model.pkl', 'wb'))
+    pickle.dump(util.cos_sim, open('cos_sim.pkl','wb'))
+  cos_sim = pickle.load(open('cos_sim.pkl', 'rb'))
   URLS = [
     'https://www.cs.ubbcluj.ro//files/curricula/2022/syllabus/IS_sem1_MME8025_en_grigo_2022_6966.pdf',
     # 'https://www.cs.ubbcluj.ro//files/curricula/2022/syllabus/IS_sem1_MME8005_en_vladi_2022_6967.pdf',
@@ -69,18 +80,18 @@ def document_process(model = predef_model):
   file_dict = {} 
 
   #loop through the lines in the text file 
-  key = 0; 
+  # key = 0; 
   for URL in URLS: 
     req = urllib.request.Request(URL)
     remote_file = urllib.request.urlopen(req).read()
     remote_file_bytes = io.BytesIO(remote_file)
     pdfdoc_remote = PyPDF2.PdfReader(remote_file_bytes)
     raw = pdfdoc_remote.pages[1].extract_text()
-    print(pdfdoc_remote.pages[1].extract_text())
-    print(raw)
+    # print(pdfdoc_remote.pages[1].extract_text())
+    # print(raw)
     textParsed = raw.replace('\n', '')
 
-    print('------------' )
+    # print('------------' )
 
     cp_key = 'Professional competencies' if len(textParsed.split('Professional competencies')) > 1 else 'Competenţe profesionale'
     tp_key = 'Transversal competencies' if len(textParsed.split('Transversal competencies')) > 1 else 'Competenţe transversale'
@@ -112,15 +123,18 @@ def document_process(model = predef_model):
     # file_dict[key] = value 
     
   #print the dictionary 
-  print('----------------')
+  # print('----------------')
 
-  print(file_dict)
+  # print(file_dict)
 
   # embedder = SentenceTransformer('distiluse-base-multilingual-cased-v2')
-  skills = ['Agile methodologies', 
+  skills = [
+        'Agile methodologies', 
         'Agile practices', 
         'Communication', 
-        'Activitati de cercetare', 'Etica']
+        'Activitati de cercetare', 
+        'Etica'
+        ]
   
   result = []
 
@@ -136,17 +150,17 @@ def document_process(model = predef_model):
       embeddings1 = model.encode(elements, convert_to_tensor=True)
       embeddings2 = model.encode(skills, convert_to_tensor=True)
 
-      cosine_scores = util.cos_sim(embeddings1, embeddings2)
+      cosine_scores = cos_sim(embeddings1, embeddings2)
 
 
       #Output the pairs with their score
       for i in range(len(skills)):
-          print("{} \t\t {} \t\t Score: {:.4f}".format(elements[i], skills[i], cosine_scores[i][i]))
+          # print("{} \t\t {} \t\t Score: {:.4f}".format(elements[i], skills[i], cosine_scores[i][i]))
           result.append({'element': elements[i], 'skill': skills[i], 'score': cosine_scores[i][i].item()})
 
-    print('\n') 
+    # print('\n') 
 
-    print('+++++++++++++++++++++')
+    # print('+++++++++++++++++++++')
 
   
   return result

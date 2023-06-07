@@ -23,7 +23,13 @@ def process_document():
     filename = 'saved_model.pkl'
     if os.path.isfile(filename):
         model = pickle.load(open(filename, 'rb'))
-        results = document_process(model)
+        if os.path.isfile( 'cos_sim.pkl'):
+            print('aici')
+            cos_sim = pickle.load(open('cos_sim.pkl', 'rb'))
+            results = document_process(model, cos_sim)
+        else:
+            print('here')
+            results = document_process(model)
     else:
         results = document_process()
     filteredResult = filter(filterFunction, results)
