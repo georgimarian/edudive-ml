@@ -11,4 +11,4 @@ RUN pip install -r requirements.txt
 COPY . .
 
 EXPOSE 5000
-CMD [ "flask", "--app", "api/hello.py","run","--host","0.0.0.0","--port","5009"]
+CMD [ "flask", "--app", "api/main.py","run","--host","0.0.0.0","--port","5009"]
