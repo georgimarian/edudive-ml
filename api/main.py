@@ -1,5 +1,5 @@
 from flask import Flask
-
+from flask import request
 from document_process import document_process, showcase_model, multilingual_model, text_summarization
 
 import json
@@ -12,13 +12,6 @@ app = Flask(__name__)
 @app.route("/")
 def hello_world():
     return "hello world"
-
-
-def filterFunction(result):
-    print(result)
-    if result['score'] > 0.2:
-        return True
-    return False
 
 
 @app.route("/simpleExample")
@@ -64,45 +57,91 @@ def summarization_simple_example():
     return '<div style="width:50%">' + stringResp + '</p></div>'
 
 
+def filterFunction(result):
+    if result['score'] > 0.2:
+        return True
+    return False
+
+
 @app.route("/demo-process")
 def demo_process_document():
+    skills = [
+        'Agile methodologies',
+        'Agile practices',
+        'Communication',
+        'Activitati de cercetare',
+        'Etica'
+    ]
     filename = 'saved_model.pkl'
     if os.path.isfile(filename):
         model = pickle.load(open(filename, 'rb'))
         if os.path.isfile('cos_sim.pkl'):
             cos_sim = pickle.load(open('cos_sim.pkl', 'rb'))
-            results = document_process(model, cos_sim)
+            results = document_process(
+                model, cos_sim, skills=skills, process_urls=True)
         else:
-            results = document_process(model)
+            results = document_process(model, skills=skills, process_urls=True)
     else:
         results = document_process()
-    filteredResult = filter(filterFunction, results)
-    # print(result)
-    result_as_list = list(filteredResult)
+
+    result_as_list = []
+    for subject in results:
+        filteredResult = filter(filterFunction, subject['devisedSkills'])
+        result_as_list.append(list(filteredResult))
+    # result_as_list = list(filteredResult)
     stringResp = ''
     for i in range(len(result_as_list)):
-        stringResp += "<tr><td>{}</td><td>{}</td><td>{:.4f}</td> </tr>".format(
-            result_as_list[i]['element'], result_as_list[i]['skill'], result_as_list[i]['score'])
-    return '<div><h1>Document Process Demo</h1><a href="https://www.cs.ubbcluj.ro//files/curricula/2022/syllabus/IS_sem1_MME8025_en_grigo_2022_6966.pdf">RE</a>' + stringResp + '</table></div>'
+        print(result_as_list[i])
+        for j in range(len(result_as_list[i])):
+            stringResp += "<tr><td>{}</td><td>{}</td><td>{:.4f}</td> </tr>".format(
+                result_as_list[i][j]['element'], result_as_list[i][j]['skill'], result_as_list[i][j]['score'])
+    return '<div><h1>Document Process Demo</h1><a href="https://www.cs.ubbcluj.ro//files/curricula/2022/syllabus/IS_sem1_MME8025_en_grigo_2022_6966.pdf">RE</a><table><th>Skill set</th><th>Sentence</th><th>Score</th>' + stringResp + '</table></div>'
 
 
-@app.route("/process")
+@app.route("/process",  methods=['GET', 'POST'])
 def process_document():
+    isPdp = request.args.get('isPdp')
+    # print('data', request.data)
+    print(request.data)
+    # print('files', request.files.get('file'))
+    print('args', request.args.get('isPdp'))
+    reqSkills = request.args.get('skills')
+    print(reqSkills)
+    file = request.files.get('file')
+
     filename = 'saved_model.pkl'
+    skills = [
+        'Agile methodologies',
+        'Agile practices',
+        'Communication',
+        'Activitati de cercetare',
+        'Etica'
+    ]
+
     if os.path.isfile(filename):
         model = pickle.load(open(filename, 'rb'))
-        if os.path.isfile('cos_sim.pkl'):
-            print('aici')
-            cos_sim = pickle.load(open('cos_sim.pkl', 'rb'))
-            results = document_process(model, cos_sim)
+        if isPdp:
+            print("pdp")
+            results = document_process(
+                model, skills=reqSkills.split(','), file=request.files.get('file'))
         else:
-            print('here')
-            results = document_process(model)
+            if os.path.isfile('cos_sim.pkl'):
+                cos_sim = pickle.load(open('cos_sim.pkl', 'rb'))
+                results = document_process(
+                    model, cos_sim, skills=skills)
+            else:
+                results = document_process(
+                    model, skills=reqSkills if reqSkills else skills)
     else:
         results = document_process()
-    filteredResult = filter(filterFunction, results)
-    # print(result)
-    return json.dumps(list(filteredResult))
+    result_as_list = []
+    if (isPdp):
+        filteredResult = filter(filterFunction, results)
+        return json.dumps(list(filteredResult))
+    for subject in results:
+        filteredResult = filter(filterFunction, subject['devisedSkills'])
+        result_as_list.append(list(filteredResult))
+    return json.dumps(list(result_as_list))
 
 
 if __name__ == "__main__":
